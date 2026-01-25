@@ -1,5 +1,6 @@
 from django.db import models
 from core.models import ModeloBase
+from productos.enums import TipoProducto
 
 class Categoria(ModeloBase):
     nombre = models.CharField(max_length=100, unique=True)
@@ -12,7 +13,11 @@ class Categoria(ModeloBase):
 class Producto(ModeloBase):
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True, null=True)
-    precio = models.IntegerField()   
+    precio = models.IntegerField()
+    tipo = models.CharField(
+        choices=TipoProducto.choices,
+        max_length=20
+        )
     categoria = models.ForeignKey(
         Categoria,
         on_delete=models.PROTECT,

@@ -14,6 +14,16 @@ class ModeloBase(models.Model):
 
 
 class Usuario(AbstractUser,ModeloBase):
+
+    restaurante = models.ForeignKey(
+        'restaurantes.REstaurante',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='usuarios'
+    )
+
+
     rol = models.CharField(
         max_length=20,
         choices=RolUsuario.choices,
@@ -22,3 +32,10 @@ class Usuario(AbstractUser,ModeloBase):
 
     def __str__(self):
         return f"{self.username} ({self.rol})"
+    
+class Modulo(ModeloBase):
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.nombre

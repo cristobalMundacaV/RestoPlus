@@ -5,5 +5,4 @@ class RolUsuario(models.TextChoices):
     ENCARGADO = 'ENCARGADO', 'Encargado'
     MESERO = 'MESERO', 'Mesero'
     COCINERO = 'COCINERO', 'Cocinero'
-    COMENSAL = 'COMENSAL', 'Comensal'
     BARTENDER = 'BARTENDER', 'Bartender'

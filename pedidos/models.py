@@ -27,6 +27,7 @@ class Pedido(ModeloBase):
         choices=EstadoPedido.choices,
         default=EstadoPedido.ABIERTO
     )
+    fecha_pedido = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         mesa = self.mesa.numero if self.mesa else "Mostrador"
         return f"Pedido {self.id} - Mesa {mesa} - {self.estado}"
@@ -42,10 +43,7 @@ class DetallePedido(ModeloBase):
         on_delete=models.PROTECT
     )
     cantidad = models.PositiveIntegerField()
-    precio_unitario = models.DecimalField(
-        max_digits=10,
-        decimal_places=2
-    )
+    precio_unitario = models.IntegerField()
     class Meta:
         unique_together = ('pedido', 'producto')
 
