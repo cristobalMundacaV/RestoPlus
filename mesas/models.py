@@ -10,7 +10,7 @@ class Sala(ModeloBase):
 
 class Mesa(ModeloBase):
     numero = models.PositiveIntegerField()
-    sala = models.ForeignKey(Sala, on_delete=models.CASCADE, related_name='mesas')
+    sala = models.ForeignKey(Sala, on_delete=models.PROTECT, null=True, blank=True, related_name='mesas')
     capacidad = models.PositiveIntegerField()
     estado = models.CharField(
         max_length=20,

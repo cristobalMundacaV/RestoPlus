@@ -3,6 +3,7 @@ from django.db.models import F
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
+from auditoria.models import Auditoria
 from cajas.enums import TipoMovimientoCaja
 from inventario.enums import TipoMovimientoInventario
 from core.models import ModeloBase, Usuario
@@ -10,6 +11,7 @@ from pedidos.models import Pedido
 from cajas.models import Caja, MovimientoCaja
 from ventas.enums import MetodoPago
 from inventario.models import MovimientoInventario, Ingrediente
+from auditoria.enums import TipoEventoAuditoria, ModuloAuditoria
 
 
 class Venta(ModeloBase):
@@ -74,6 +76,13 @@ class Venta(ModeloBase):
             descripcion=f'Venta realizada para el pedido {pedido.id}'
         )
 
+        Auditoria.objects.create(
+            usuario=usuario,
+            accion=TipoEventoAuditoria.CREAR,
+            modulo=ModuloAuditoria.VENTAS,
+            descripcion=f'Se creó la venta {venta.id} para el pedido {pedido.id}'
+        )
+
         ingredientes_ids = []
         for detalle in pedido.detalles.all():
             for receta in detalle.producto.recetas.all():
@@ -115,6 +124,13 @@ class Venta(ModeloBase):
             tipo=TipoMovimientoCaja.EGRESO,
             monto=self.monto_total,
             descripcion=f'Anulación de venta para el pedido {self.pedido.id}'
+        )
+
+        Auditoria.objects.create(
+            usuario=usuario_anulacion,
+            accion=TipoEventoAuditoria.ELIMINAR,
+            modulo=ModuloAuditoria.VENTAS,
+            descripcion=f'Se anuló la venta {self.id} para el pedido {self.pedido.id}'
         )
 
         for detalle in self.pedido.detalles.select_related('producto'):
