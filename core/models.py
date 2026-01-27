@@ -16,7 +16,7 @@ class ModeloBase(models.Model):
 class Usuario(AbstractUser,ModeloBase):
 
     restaurante = models.ForeignKey(
-        'restaurantes.REstaurante',
+        'restaurantes.Restaurante',
         on_delete=models.CASCADE,
         null=True,
         blank=True,

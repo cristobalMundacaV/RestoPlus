@@ -1,9 +1,35 @@
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum,Case,When,Value,IntegerField
 from django.core.exceptions import ValidationError
 from cajas.enums import TipoMovimientoCaja
 from core.models import ModeloBase
 from django.utils import timezone
+
+class CajaQuerySet(models.QuerySet):
+    def con_saldos(self):
+        return self.annotate(
+            total_ingresos=Sum(
+                Case(
+                    When(movimientos__tipo=TipoMovimientoCaja.INGRESO, then='movimientos__monto'),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+            total_egresos=Sum(
+                Case(
+                    When(movimientos__tipo=TipoMovimientoCaja.EGRESO, then='movimientos__monto'),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            )
+        )
+
+class CajaManager(models.Manager):
+    def get_queryset(self):
+        return CajaQuerySet(self.model, using=self._db)
+    
+    def con_saldos(self):
+        return self.get_queryset().con_saldos()
 
 class Caja(ModeloBase):
     usuario_apertura = models.ForeignKey(
@@ -23,35 +49,15 @@ class Caja(ModeloBase):
     fecha_apertura = models.DateTimeField(auto_now_add=True)
     fecha_cierre = models.DateTimeField(null=True, blank=True)
 
-    def cerrar(self, usuario):
-        if not self.abierta:
-            raise ValidationError("La caja ya está cerrada")
-        self.abierta = False
-        self.usuario_cierre = usuario
-        self.fecha_cierre = timezone.now()
-        self.save(update_fields=["abierta", "usuario_cierre", "fecha_cierre"])
+    objects = CajaManager()
 
-    @property
-    def total_ingresos(self):
-        return self.movimientos.filter(
-            tipo=TipoMovimientoCaja.INGRESO
-        ).aggregate(total=Sum('monto'))['total'] or 0
-
-    @property
-    def total_egresos(self):
-        return self.movimientos.filter(
-            tipo=TipoMovimientoCaja.EGRESO
-        ).aggregate(total=Sum('monto'))['total'] or 0
-
-    @property
-    def saldo_actual(self):
-        return self.saldo_inicial + self.total_ingresos - self.total_egresos
-    
-    def puede_registrar_movimientos(self):
-        return self.abierta
+    def clean(self):
+        if self.fecha_cierre and self.fecha_cierre < self.fecha_apertura:
+            raise ValidationError("La fecha de cierre no puede ser anterior a la fecha de apertura")
     
     def __str__(self):
-        return f"Caja abierta por {self.usuario_apertura} - Saldo inicial: {self.saldo_inicial}"
+        estado="Abierta" if self.abierta else "Cerrada"
+        return f"Caja {self.id} {estado} por {self.usuario_apertura} - Saldo inicial: {self.saldo_inicial}"
     
 class MovimientoCaja(ModeloBase):
     caja = models.ForeignKey(
@@ -67,13 +73,14 @@ class MovimientoCaja(ModeloBase):
     monto = models.IntegerField()
     fecha_movimiento = models.DateTimeField(auto_now_add=True)
 
+    def clean(self):
+        if self.monto and self.monto <= 0:
+            raise ValidationError({"monto": "El monto debe ser mayor a cero"})
+        if self.caja and not self.caja.abierta:
+            raise ValidationError({"caja": "No se pueden registrar movimientos en caja cerrada"})
+    
     def save(self, *args, **kwargs):
-        if self.monto <= 0:
-            raise ValidationError("El monto debe ser mayor a cero")
-        if not self.caja.puede_registrar_movimientos():
-            raise ValidationError(
-                "No se pueden registrar movimientos en una caja cerrada"
-            )
+        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):

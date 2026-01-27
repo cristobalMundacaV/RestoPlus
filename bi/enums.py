@@ -1,3 +1,5 @@
+from django.db import models
+
 class FranjaHoraria(models.TextChoices):
     MANANA = 'MANANA', 'Mañana (08:00 - 12:00)'
     TARDE = 'TARDE', 'Tarde (12:00 - 15:00)'
