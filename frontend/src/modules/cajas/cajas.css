@@ -1,0 +1,32 @@
+.cajas-container { padding: 0; }
+
+.cajas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.cajas-header h1 { margin: 0; font-size: 1.75rem; color: #333; }
+
+.apertura { display: flex; gap: 0.5rem; align-items: center; }
+.apertura input { padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 4px; width: 140px; }
+
+.cajas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+
+.caja-card { background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.08); border-left: 5px solid #ddd; }
+.caja-card.abierta { border-left-color: #2ecc71; }
+.caja-card.cerrada { border-left-color: #e74c3c; }
+
+.caja-title { font-weight: 700; margin-bottom: 0.5rem; }
+.caja-info { display: flex; flex-direction: column; gap: 0.25rem; color: #666; margin-bottom: 1rem; }
+
+.btn-primary { padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; }
+.btn-delete { padding: 0.5rem 1rem; background: #ff6b6b; color: white; border: none; border-radius: 4px; cursor: pointer; }
+
+.loading { text-align: center; padding: 2rem; color: #666; }
+
+@media (prefers-color-scheme: dark) {
+  .cajas-header h1 { color: #e0e0e0; }
+  .caja-card { background: #1e1e1e; }
+}

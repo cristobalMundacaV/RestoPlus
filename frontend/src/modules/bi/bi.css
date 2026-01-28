@@ -1,0 +1,19 @@
+.bi-container { padding: 0; }
+
+.bi-container h1 { margin-bottom: 1.5rem; color: #333; }
+
+.bi-section { margin-bottom: 2rem; }
+.bi-section h2 { margin-bottom: 0.75rem; }
+
+.bi-card { background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
+.bi-list { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
+.bi-row { display: flex; justify-content: space-between; padding: 0.75rem 1rem; border-top: 1px solid #eee; }
+.bi-row:first-child { border-top: none; }
+
+.loading { text-align: center; padding: 2rem; color: #666; }
+
+@media (prefers-color-scheme: dark) {
+  .bi-container h1 { color: #e0e0e0; }
+  .bi-card, .bi-list { background: #1e1e1e; }
+  .bi-row { border-top-color: #333; }
+}

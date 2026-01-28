@@ -1,0 +1,22 @@
+.usuarios-container { padding: 0; }
+
+.usuarios-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+.usuarios-header h1 { margin: 0; font-size: 1.75rem; color: #333; }
+
+.usuarios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+.usuario-card { background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
+.usuario-title { font-weight: 700; margin-bottom: 0.5rem; }
+.usuario-info { display: flex; flex-direction: column; gap: 0.25rem; color: #666; margin-bottom: 1rem; }
+
+.usuario-form { display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem; }
+.usuario-form input, .usuario-form select { padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 4px; }
+
+.btn-primary { padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; }
+.btn-secondary { padding: 0.5rem 1rem; background: #e0e0e0; color: #333; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; }
+.btn-delete { padding: 0.4rem 0.75rem; background: #ff6b6b; color: white; border: none; border-radius: 4px; cursor: pointer; }
+
+@media (prefers-color-scheme: dark) {
+  .usuarios-header h1 { color: #e0e0e0; }
+  .usuario-card { background: #1e1e1e; }
+  .usuario-info { color: #b0b0b0; }
+}
