@@ -1,21 +1,93 @@
-.inventario-container { padding: 0; }
+.inventario-container { 
+  padding: 0; 
+}
 
-.inventario-container h1 { margin-bottom: 1.5rem; color: #333; }
+.inventario-container h1 { 
+  margin-bottom: 1.5rem; 
+  color: #333; 
+}
 
-.inventario-section { margin-bottom: 2rem; }
-.inventario-section h2 { margin-bottom: 1rem; }
+.inventario-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e0e0e0;
+  padding: 0 20px;
+}
 
-.tabla { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
-.tabla-header, .tabla-row { display: grid; grid-template-columns: repeat(4, 1fr); padding: 0.75rem 1rem; }
-.tabla-header { background: #f5f5f5; font-weight: 600; }
-.tabla-row { border-top: 1px solid #eee; }
-.tabla-row.critico { background: #fff3cd; }
+.tab-button {
+  padding: 12px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: #666;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  margin-bottom: -2px;
+}
 
-.loading { text-align: center; padding: 2rem; color: #666; }
+.tab-button:hover {
+  color: #4CAF50;
+}
+
+.tab-button.active {
+  color: #4CAF50;
+  border-bottom-color: #4CAF50;
+}
+
+.inventario-section { 
+  margin-bottom: 2rem; 
+}
+
+.inventario-section h2 { 
+  margin-bottom: 1rem; 
+}
+
+.tabla { 
+  background: white; 
+  border-radius: 8px; 
+  overflow: hidden; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08); 
+}
+
+.tabla-header, .tabla-row { 
+  display: grid; 
+  grid-template-columns: repeat(4, 1fr); 
+  padding: 0.75rem 1rem; 
+}
+
+.tabla-header { 
+  background: #f5f5f5; 
+  font-weight: 600; 
+}
+
+.tabla-row { 
+  border-top: 1px solid #eee; 
+}
+
+.tabla-row.critico { 
+  background: #fff3cd; 
+}
+
+.loading { 
+  text-align: center; 
+  padding: 2rem; 
+  color: #666; 
+}
 
 @media (prefers-color-scheme: dark) {
-  .inventario-container h1 { color: #e0e0e0; }
-  .tabla { background: #1e1e1e; }
-  .tabla-header { background: #2d2d2d; }
-  .tabla-row { border-top-color: #333; }
+  .inventario-container h1 { 
+    color: #e0e0e0; 
+  }
+  .tabla { 
+    background: #1e1e1e; 
+  }
+  .tabla-header { 
+    background: #2d2d2d; 
+  }
+  .tabla-row { 
+    border-top-color: #333; 
+  }
 }

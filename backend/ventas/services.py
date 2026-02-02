@@ -118,3 +118,7 @@ def anular_venta(venta, usuario_anulacion):
         venta.usuario_anulacion = usuario_anulacion
         venta.fecha_anulacion = timezone.now()
         venta.save(update_fields=['anulada', 'usuario_anulacion', 'fecha_anulacion'])
+
+def generar_boleta(venta):
+    # Lógica para generar la boleta asociada a la venta
+    pass

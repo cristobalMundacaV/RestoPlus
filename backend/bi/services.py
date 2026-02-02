@@ -1,8 +1,9 @@
-from django.db.models import F
-from django.db.models import Sum,Count
+from datetime import datetime, timedelta
+from django.db.models import F, Sum, Count, Value, FloatField, ExpressionWrapper, Case, When
+from django.db.models.functions import TruncDate
 from ventas.models import Venta
 from pedidos.models import DetallePedido
-from inventario.models import Ingrediente
+from inventario.models import Ingrediente, MovimientoInventario
 from cajas.models import MovimientoCaja
 from cajas.enums import TipoMovimientoCaja
 
@@ -61,3 +62,68 @@ def resumen_caja():
         'egresos': egresos['total'] or 0,
         'saldo': (ingresos['total'] or 0) - (egresos['total'] or 0)
     }
+
+def rentabilidad_por_producto(fecha_inicio=None, fecha_fin=None):
+    if not fecha_inicio:
+        fecha_inicio = datetime.now().date() - timedelta(days=30)
+    if not fecha_fin:
+        fecha_fin = datetime.now().date()
+
+    ingresos_expr = ExpressionWrapper(
+        F('cantidad') * F('precio_unitario'),
+        output_field=FloatField()
+    )
+
+    data = DetallePedido.objects.filter(
+        pedido__venta__fecha_venta__date__range=(fecha_inicio, fecha_fin),
+        pedido__venta__anulada=False
+    ).values('producto__nombre').annotate(
+        cantidad=Sum('cantidad'),
+        ingresos=Sum(ingresos_expr),
+        costo_produccion=Value(0.0, output_field=FloatField()),
+    )
+
+    data = data.annotate(
+        ganancia=ExpressionWrapper(
+            F('ingresos') - F('costo_produccion'),
+            output_field=FloatField()
+        ),
+        margen=Case(
+            When(ingresos__gt=0, then=ExpressionWrapper(F('ganancia') * 100.0 / F('ingresos'), output_field=FloatField())),
+            default=Value(0.0, output_field=FloatField()),
+            output_field=FloatField(),
+        )
+    ).order_by('-ingresos')
+
+    return list(data)
+
+def perdidas_inventario(fecha_inicio=None, fecha_fin=None):
+    if not fecha_inicio:
+        fecha_inicio = datetime.now().date() - timedelta(days=30)
+    if not fecha_fin:
+        fecha_fin = datetime.now().date()
+
+    perdidas = MovimientoInventario.objects.filter(
+        tipo_movimiento='EGRESO',
+        venta__isnull=True,
+        fecha_movimiento__date__range=(fecha_inicio, fecha_fin)
+    ).values('ingrediente__nombre').annotate(
+        cantidad_perdida=Sum('cantidad')
+    ).order_by('-cantidad_perdida')
+
+    return list(perdidas)
+
+def tendencias_venta(dias=30):
+    fecha_inicio = datetime.now().date() - timedelta(days=dias)
+
+    datos = Venta.objects.filter(
+        fecha_venta__date__gte=fecha_inicio,
+        anulada=False
+    ).annotate(
+        fecha=TruncDate('fecha_venta')
+    ).values('fecha').annotate(
+        total=Sum('monto_total'),
+        cantidad=Count('id')
+    ).order_by('fecha')
+
+    return list(datos)

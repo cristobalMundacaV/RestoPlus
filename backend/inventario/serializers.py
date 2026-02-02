@@ -2,10 +2,14 @@ from rest_framework import serializers
 from .models import Ingrediente,Receta,MovimientoInventario
 
 class IngredienteSerializer(serializers.ModelSerializer):
+    tipo_insumo_display = serializers.SerializerMethodField()
     class Meta:
         model = Ingrediente
-        fields = ['id', 'nombre', 'unidad_medida', 'stock_actual', 'stock_minimo','es_critico', 'creado', 'modificado']
-        read_only_fields = ['id', 'creado', 'modificado']
+        fields = ['id', 'nombre', 'unidad_medida', 'tipo_insumo', 'tipo_insumo_display', 'stock_actual', 'stock_minimo','es_critico', 'creado', 'modificado']
+        read_only_fields = ['id', 'creado', 'modificado', 'tipo_insumo_display']
+
+    def get_tipo_insumo_display(self, obj):
+        return obj.get_tipo_insumo_display()
 
 class RecetaSerializer(serializers.ModelSerializer):
     producto_nombre = serializers.CharField(source='producto.nombre', read_only=True) 

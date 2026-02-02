@@ -10,6 +10,14 @@ export default function ProductosList() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingProducto, setEditingProducto] = useState(null)
+  const [seedingCategorias, setSeedingCategorias] = useState(false)
+  const categoriasDefault = [
+    { value: 'COMIDA', label: 'Comida' },
+    { value: 'BEBESTIBLE', label: 'Bebestible' },
+    { value: 'BEBIDA_ALCOLICA', label: 'Bebida Alcohólica' },
+    { value: 'INGREDIENTE', label: 'Ingrediente' },
+    { value: 'INSUMO', label: 'Insumo' },
+  ]
   const [filters, setFilters] = useState({
     search: '',
     categoria: '',
@@ -24,12 +32,36 @@ export default function ProductosList() {
   const cargarDatos = async () => {
     setLoading(true)
     try {
+      const params = Object.fromEntries(
+        Object.entries(filters).filter(([, value]) => value !== '' && value !== null)
+      )
       const [prodRes, catRes] = await Promise.all([
-        productosAPI.list(filters),
+        productosAPI.list(params),
         categoriasAPI.list({ activo: true }),
       ])
       setProductos(prodRes.data.results || prodRes.data)
-      setCategorias(catRes.data.results || catRes.data)
+      const categoriasData = catRes.data.results || catRes.data
+      setCategorias(categoriasData)
+
+      if (!seedingCategorias) {
+        const existentes = new Set(categoriasData.map((cat) => cat.nombre))
+        const faltantes = categoriasDefault.filter((cat) => !existentes.has(cat.value))
+        if (faltantes.length) {
+          setSeedingCategorias(true)
+          await Promise.all(
+            faltantes.map((cat, index) =>
+              categoriasAPI.create({
+                nombre: cat.value,
+                orden: index,
+                activo: true,
+              })
+            )
+          )
+          const recarga = await categoriasAPI.list({ activo: true })
+          setCategorias(recarga.data.results || recarga.data)
+          setSeedingCategorias(false)
+        }
+      }
     } catch (error) {
       console.error('Error cargando datos:', error)
       alert('Error al cargar productos')
@@ -48,13 +80,16 @@ export default function ProductosList() {
     setShowForm(true)
   }
 
-  const handleDelete = async (id) => {
-    if (!confirm('¿Desactivar este producto?')) return
+  const handleDelete = async (producto) => {
+    if (!confirm('¿Eliminar este producto?')) return
     try {
-      await productosAPI.desactivar(id)
+      await productosAPI.remove(producto.id)
       cargarDatos()
     } catch (error) {
-      alert('Error al desactivar producto')
+      const message =
+        error.response?.data?.detail ||
+        'El producto se tiene que desactivar porque está asociado a pedidos'
+      alert(message)
     }
   }
 
@@ -117,15 +152,28 @@ export default function ProductosList() {
 
       <div className="productos-grid">
         {productos.map((producto) => (
-          <div key={producto.id} className="producto-card">
+          <div
+            key={producto.id}
+            className={`producto-card ${producto.activo ? '' : 'producto-inactivo'}`}
+          >
             <div className="producto-header">
               <h3>{producto.nombre}</h3>
-              <button
-                onClick={() => handleToggleFavorito(producto)}
-                className={`btn-favorito ${producto.favorito ? 'active' : ''}`}
-              >
-                {producto.favorito ? '⭐' : '☆'}
-              </button>
+              <div className="producto-header-actions">
+                <button
+                  onClick={() => handleToggleFavorito(producto)}
+                  className={`btn-favorito ${producto.favorito ? 'active' : ''}`}
+                >
+                  {producto.favorito ? '⭐' : '☆'}
+                </button>
+                <button
+                  onClick={() => handleDelete(producto)}
+                  className="btn-delete-icon"
+                  aria-label="Eliminar producto"
+                  title="Eliminar"
+                >
+                  🗑️
+                </button>
+              </div>
             </div>
             <p className="producto-descripcion">{producto.descripcion || 'Sin descripción'}</p>
             <div className="producto-info">
@@ -137,9 +185,6 @@ export default function ProductosList() {
             <div className="producto-actions">
               <button onClick={() => handleEdit(producto)} className="btn-edit">
                 Editar
-              </button>
-              <button onClick={() => handleDelete(producto.id)} className="btn-delete">
-                Desactivar
               </button>
             </div>
           </div>

@@ -7,6 +7,9 @@ from .views import(
     IngredientesStockCriticoView,
     VentasPorMetodoPagoView,
     ResumenCajaView,
+    RentabilidadPorProductoView,
+    PerdidasInventarioView,
+    TendenciasVentaView,
 )
 
 urlpatterns = [
@@ -17,4 +20,7 @@ urlpatterns = [
     path('ingredientes/stock-critico/', IngredientesStockCriticoView.as_view(), name='ingredientes_stock_critico'),
     path('ventas/por-metodo-pago/', VentasPorMetodoPagoView.as_view(), name='ventas_por_metodo_pago'),
     path('caja/resumen/', ResumenCajaView.as_view(), name='resumen_caja'),
+    path('rentabilidad-por-producto/', RentabilidadPorProductoView.as_view(), name='rentabilidad_por_producto'),
+    path('perdidas-inventario/', PerdidasInventarioView.as_view(), name='perdidas_inventario'),
+    path('tendencias-venta/', TendenciasVentaView.as_view(), name='tendencias_venta'),
 ]

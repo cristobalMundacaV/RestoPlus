@@ -9,6 +9,13 @@ const api = axios.create({
   },
 })
 
+const refreshApi = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
 // Agregar token a cada request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token')
@@ -21,8 +28,29 @@ api.interceptors.request.use((config) => {
 // Manejar errores de autenticación
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
+  async (error) => {
+    const originalRequest = error.config
+    if (error.response?.status === 401 && !originalRequest?._retry) {
+      originalRequest._retry = true
+      const refresh = localStorage.getItem('refresh_token')
+
+      if (refresh) {
+        try {
+          const refreshResponse = await refreshApi.post('/core/auth/refresh/', {
+            refresh,
+          })
+          const { access } = refreshResponse.data
+          localStorage.setItem('access_token', access)
+          originalRequest.headers.Authorization = `Bearer ${access}`
+          return api(originalRequest)
+        } catch (refreshError) {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+          window.location.href = '/'
+          return Promise.reject(refreshError)
+        }
+      }
+
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
       window.location.href = '/'

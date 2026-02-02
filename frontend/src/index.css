@@ -1,6 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+body {
+  font-family: inherit;
 }
 
 a {
@@ -14,7 +21,7 @@ a:hover {
 }
 
 button {
-  border-radius: 8px;
+  border-radius: 999px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
   font-size: 1em;

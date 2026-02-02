@@ -50,6 +50,19 @@
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
+.producto-card.producto-inactivo {
+  background: #f0f0f0;
+  color: #8a8a8a;
+  opacity: 0.7;
+}
+
+.producto-card.producto-inactivo .producto-precio,
+.producto-card.producto-inactivo .producto-header h3,
+.producto-card.producto-inactivo .producto-descripcion,
+.producto-card.producto-inactivo .badge {
+  color: #8a8a8a;
+}
+
 .producto-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -60,6 +73,12 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 0.75rem;
+}
+
+.producto-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .producto-header h3 {
@@ -83,6 +102,21 @@
 
 .btn-favorito.active {
   color: #ffd700;
+}
+
+.btn-delete-icon {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  color: #999;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.btn-delete-icon:hover {
+  color: #ff5252;
+  transform: scale(1.1);
 }
 
 .producto-descripcion {
@@ -130,9 +164,9 @@
 .btn-edit,
 .btn-delete {
   flex: 1;
-  padding: 0.5rem;
+  padding: 0.6rem 1.4rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 999px !important;
   font-size: 0.9rem;
   cursor: pointer;
   transition: background 0.2s;
@@ -161,7 +195,7 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 999px;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s;
@@ -176,7 +210,7 @@
   background: #e0e0e0;
   color: #333;
   border: none;
-  border-radius: 4px;
+  border-radius: 999px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -284,6 +318,12 @@
 .form-group-checkbox {
   display: flex;
   align-items: center;
+}
+
+.form-group-checkbox-inline {
+  justify-content: flex-start;
+  margin-left: 1.25rem;
+  align-self: center;
 }
 
 .form-group-checkbox label {

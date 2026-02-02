@@ -8,6 +8,7 @@ export default function Cajas() {
   const [loading, setLoading] = useState(true)
   const [saldoInicial, setSaldoInicial] = useState('')
   const [aperturando, setAperturando] = useState(false)
+  const [mostrarModal, setMostrarModal] = useState(false)
 
   useEffect(() => {
     cargarCajas()
@@ -30,6 +31,7 @@ export default function Cajas() {
     try {
       await cajasAPI.create({ saldo_inicial: saldoInicial || 0 })
       setSaldoInicial('')
+      setMostrarModal(false)
       cargarCajas()
     } catch (error) {
       alert(error.response?.data?.error || 'No se pudo abrir caja')
@@ -55,13 +57,11 @@ export default function Cajas() {
       <div className="cajas-header">
         <h1>Cajas</h1>
         <div className="apertura">
-          <input
-            type="number"
-            placeholder="Saldo inicial"
-            value={saldoInicial}
-            onChange={(e) => setSaldoInicial(e.target.value)}
-          />
-          <button className="btn-primary" onClick={abrirCaja} disabled={aperturando}>
+          <button
+            className="btn-primary"
+            onClick={() => setMostrarModal(true)}
+            disabled={aperturando}
+          >
             {aperturando ? 'Abriendo...' : 'Abrir Caja'}
           </button>
         </div>
@@ -70,9 +70,14 @@ export default function Cajas() {
       <div className="cajas-grid">
         {cajas.map((caja) => (
           <div key={caja.id} className={`caja-card ${caja.abierta ? 'abierta' : 'cerrada'}`}>
-            <div className="caja-title">Caja #{caja.id}</div>
+            <div className="caja-title">Caja {formatDateTime(caja.fecha_apertura)}</div>
             <div className="caja-info">
-              <span>Estado: {caja.abierta ? 'Abierta' : 'Cerrada'}</span>
+              <span className="caja-estado">
+                Estado:
+                <span className={`badge ${caja.abierta ? 'success' : 'warning'}`}>
+                  {caja.abierta ? 'Abierta' : 'Cerrada'}
+                </span>
+              </span>
               <span>Saldo Inicial: {formatMoney(caja.saldo_inicial)}</span>
               <span>Total Ingresos: {formatMoney(caja.total_ingresos)}</span>
               <span>Total Egresos: {formatMoney(caja.total_egresos)}</span>
@@ -92,6 +97,37 @@ export default function Cajas() {
       {!cajas.length && (
         <div className="empty-state">
           <p>No hay cajas registradas</p>
+        </div>
+      )}
+
+      {mostrarModal && (
+        <div className="modal-overlay" onClick={() => setMostrarModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Abrir caja</h2>
+              <button className="btn-close" onClick={() => setMostrarModal(false)}>
+                ×
+              </button>
+            </div>
+            <div className="caja-modal-body">
+              <label htmlFor="saldo-inicial">Monto inicial</label>
+              <input
+                id="saldo-inicial"
+                type="number"
+                placeholder="Saldo inicial"
+                value={saldoInicial}
+                onChange={(e) => setSaldoInicial(e.target.value)}
+              />
+            </div>
+            <div className="caja-modal-actions">
+              <button className="btn-secondary" onClick={() => setMostrarModal(false)}>
+                Cancelar
+              </button>
+              <button className="btn-primary" onClick={abrirCaja} disabled={aperturando}>
+                {aperturando ? 'Abriendo...' : 'Confirmar'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

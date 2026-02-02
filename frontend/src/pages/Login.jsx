@@ -40,7 +40,7 @@ export default function Login() {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1>RestoPlusV2</h1>
+        <h1>Foodies</h1>
         <p className="login-subtitle">Sistema de Gestión de Restaurante</p>
 
         {error && <div className="error-message">{error}</div>}
@@ -77,7 +77,7 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="login-footer">© 2024 RestoPlusV2 - Todos los derechos reservados</p>
+        <p className="login-footer">© 2024 Foodies - Todos los derechos reservados</p>
       </div>
     </div>
   )

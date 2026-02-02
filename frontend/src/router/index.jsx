@@ -5,7 +5,6 @@ import DashboardLayout from '../layouts/DashboardLayout'
 import Dashboard from '../pages/Dashboard'
 import NotFound from '../pages/NotFound'
 import ProductosList from '../modules/productos/ProductosList'
-import MesasLayout from '../modules/mesas/MesasLayout'
 import PedidosList from '../modules/pedidos/PedidosList'
 import VentasList from '../modules/ventas/VentasList'
 import Cajas from '../modules/cajas/Cajas'
@@ -54,16 +53,6 @@ const router = createBrowserRouter(
         <RequireAuth>
           <DashboardLayout>
             <VentasList />
-          </DashboardLayout>
-        </RequireAuth>
-      ),
-    },
-    {
-      path: '/mesas',
-      element: (
-        <RequireAuth>
-          <DashboardLayout>
-            <MesasLayout />
           </DashboardLayout>
         </RequireAuth>
       ),

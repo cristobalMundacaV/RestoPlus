@@ -1,6 +1,6 @@
 from django.db import models
 
-class TipoProducto(models.TextChoices):
+class CategoriaProducto(models.TextChoices):
     COMIDA = 'COMIDA', 'Comida'
     BEBESTIBLE = 'BEBESTIBLE', 'Bebestible'
     BEBIDA_ALCOLICA = 'BEBIDA_ALCOLICA', 'Bebida Alcohólica'

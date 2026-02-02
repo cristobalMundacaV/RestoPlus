@@ -73,7 +73,7 @@ Crear un archivo `.env` a partir de `.env.ejemplo`:
 ```
 DEBUG=True
 SECRET_KEY=dev-secret-key
-DB_NAME=restoplus
+DB_NAME=foodies
 DB_USER=postgres
 DB_PASSWORD=postgres
 DB_HOST=localhost

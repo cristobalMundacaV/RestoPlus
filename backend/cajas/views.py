@@ -14,12 +14,15 @@ class CajaViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            saldo_inicial = request.data.get('saldo_inicial',0)
+            saldo_inicial_raw = request.data.get('saldo_inicial', 0)
+            saldo_inicial = 0 if saldo_inicial_raw in (None, '') else int(saldo_inicial_raw)
             caja = CajaService.abrir_caja(request.user, saldo_inicial=saldo_inicial)
             serializer = self.get_serializer(caja)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except ValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except (TypeError, ValueError):
+            return Response({'error': 'Saldo inicial inválido'}, status=status.HTTP_400_BAD_REQUEST)
         
     @action(detail=True, methods=['post'])
     def cerrar(self, request, pk=None):

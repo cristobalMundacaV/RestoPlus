@@ -70,17 +70,31 @@ export default function PedidosList() {
         {pedidos.map((pedido) => (
           <div key={pedido.id} className="pedido-card">
             <div className="pedido-title">
-              Pedido #{pedido.id}
+              Pedido: {new Date(pedido.fecha_pedido).toLocaleString('es-CL')}
             </div>
             <div className="pedido-info">
               <span>Mesa: {pedido.mesa_numero || 'Mostrador'}</span>
               <span>Estado: {estadoLabel[pedido.estado] || pedido.estado}</span>
-              <span>Fecha: {new Date(pedido.fecha_pedido).toLocaleString('es-CL')}</span>
             </div>
             <div className="pedido-actions">
-              <button className="btn-secondary" onClick={() => handleEstado(pedido.id, 'EN_PREPARACION')}>En preparación</button>
-              <button className="btn-secondary" onClick={() => handleEstado(pedido.id, 'SERVIDO')}>Servido</button>
-              <button className="btn-secondary" onClick={() => handleEstado(pedido.id, 'CERRADO')}>Cerrar</button>
+              <button
+                className="btn-secondary btn-preparacion"
+                onClick={() => handleEstado(pedido.id, 'EN_PREPARACION')}
+              >
+                En preparación
+              </button>
+              <button
+                className="btn-secondary btn-servido"
+                onClick={() => handleEstado(pedido.id, 'SERVIDO')}
+              >
+                Servido
+              </button>
+              <button
+                className="btn-secondary btn-cerrar"
+                onClick={() => handleEstado(pedido.id, 'CERRADO')}
+              >
+                Cerrar
+              </button>
             </div>
           </div>
         ))}

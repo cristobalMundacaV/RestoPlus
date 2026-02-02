@@ -1,11 +1,17 @@
 from django.db import models
 
 from core.models import ModeloBase
-from inventario.enums import TipoMovimientoInventario
+from inventario.enums import TipoMovimientoInventario, TipoInsumo
 
 class Ingrediente(ModeloBase):
     nombre = models.CharField(max_length=200)
     unidad_medida = models.CharField(max_length=100)
+    tipo_insumo = models.CharField(
+        max_length=20,
+        choices=TipoInsumo.choices,
+        default=TipoInsumo.GENERAL,
+        help_text='Crítico (carnes, licores), General (verduras, condimentos), Unitario (congelados/porciones)'
+    )
     stock_actual = models.FloatField()
     stock_minimo = models.FloatField()
     es_critico = models.BooleanField(default=False)

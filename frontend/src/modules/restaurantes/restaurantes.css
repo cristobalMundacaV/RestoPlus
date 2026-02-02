@@ -14,8 +14,8 @@
 .rest-form { display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem; }
 .rest-form input, .rest-form select { padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 4px; }
 
-.btn-primary { padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; }
-.btn-secondary { padding: 0.5rem 1rem; background: #e0e0e0; color: #333; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; }
+.btn-primary { padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 999px; font-weight: 600; cursor: pointer; }
+.btn-secondary { padding: 0.5rem 1rem; background: #e0e0e0; color: #333; border: none; border-radius: 999px; font-weight: 600; cursor: pointer; }
 
 @media (prefers-color-scheme: dark) {
   .restaurantes-header h1 { color: #e0e0e0; }

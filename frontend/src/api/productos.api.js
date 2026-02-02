@@ -5,6 +5,7 @@ export const productosAPI = {
   get: (id) => api.get(`/productos/productos/${id}/`),
   create: (data) => api.post('/productos/productos/', data),
   update: (id, data) => api.patch(`/productos/productos/${id}/`, data),
+  remove: (id) => api.delete(`/productos/productos/${id}/`),
   activar: (id) => api.post(`/productos/productos/${id}/activar/`),
   desactivar: (id) => api.post(`/productos/productos/${id}/desactivar/`),
   marcarFavorito: (id) => api.post(`/productos/productos/${id}/marcar_favorito/`),

@@ -11,7 +11,17 @@ from .services import (
     ventas_por_metodo_pago,
     ingredientes_stock_critico,
     resumen_caja,
+    rentabilidad_por_producto,
+    perdidas_inventario,
+    tendencias_venta,
 )
+
+
+def _parse_date(date_str):
+    try:
+        return datetime.strptime(date_str, "%d-%m-%Y").date()
+    except (TypeError, ValueError):
+        return None
 
 
 class VentasPorDiaView(APIView):
@@ -93,4 +103,40 @@ class ResumenCajaView(APIView):
 
     def get(self, request):
         data = resumen_caja()
+        return Response(data)
+
+
+class RentabilidadPorProductoView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        fecha_inicio = _parse_date(request.query_params.get('inicio'))
+        fecha_fin = _parse_date(request.query_params.get('fin'))
+
+        data = rentabilidad_por_producto(fecha_inicio, fecha_fin)
+        return Response(data)
+
+
+class PerdidasInventarioView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        fecha_inicio = _parse_date(request.query_params.get('inicio'))
+        fecha_fin = _parse_date(request.query_params.get('fin'))
+
+        data = perdidas_inventario(fecha_inicio, fecha_fin)
+        return Response(data)
+
+
+class TendenciasVentaView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        dias = request.query_params.get('dias')
+        try:
+            dias = int(dias) if dias else 30
+        except ValueError:
+            return Response({"error": "El parámetro dias debe ser numérico"}, status=400)
+
+        data = tendencias_venta(dias)
         return Response(data)

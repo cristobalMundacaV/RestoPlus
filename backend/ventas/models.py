@@ -10,7 +10,7 @@ from inventario.enums import TipoMovimientoInventario
 from core.models import ModeloBase, Usuario
 from pedidos.models import Pedido
 from cajas.models import Caja, MovimientoCaja
-from ventas.enums import MetodoPago
+from ventas.enums import EstadoBoleta, MetodoPago
 from inventario.models import MovimientoInventario, Ingrediente
 from auditoria.enums import TipoEventoAuditoria, ModuloAuditoria
 
@@ -55,3 +55,23 @@ class Venta(ModeloBase):
             models.Index(fields=['fecha_venta']),
             models.Index(fields=['metodo_pago']),
         ]
+
+class Boleta(ModeloBase):
+    venta = models.OneToOneField(
+        Venta,
+        on_delete=models.CASCADE,
+        related_name='boleta'
+    )
+    numero = models.CharField(max_length=20, unique=True)
+    fecha_emision = models.DateTimeField(auto_now_add=True)
+    xml = models.TextField(null=True, blank=True)
+    estado = models.CharField(max_length=20, choices=EstadoBoleta.choices)
+
+    def __str__(self):
+        return f"Boleta {self.numero} - Venta {self.venta.id}"
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['numero']),
+            models.Index(fields=['fecha_emision']),
+        ]   

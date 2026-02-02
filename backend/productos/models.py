@@ -1,6 +1,6 @@
 from django.db import models
 from core.models import ModeloBase
-from productos.enums import TipoProducto
+from productos.enums import CategoriaProducto
 
 class Categoria(ModeloBase):
     restaurante = models.ForeignKey(
@@ -9,7 +9,7 @@ class Categoria(ModeloBase):
         related_name='categorias',
         null=True
     )
-    nombre = models.CharField(max_length=100)
+    nombre = models.CharField(max_length=100, choices=CategoriaProducto.choices)
     orden = models.PositiveIntegerField(default=0)
     activo = models.BooleanField(default=True)
 
@@ -29,10 +29,6 @@ class Producto(ModeloBase):
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True, null=True)
     precio = models.IntegerField()
-    tipo = models.CharField(
-        choices=TipoProducto.choices,
-        max_length=20
-        )
     categoria = models.ForeignKey(
         Categoria,
         on_delete=models.PROTECT,

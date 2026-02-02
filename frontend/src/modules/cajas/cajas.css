@@ -10,23 +10,46 @@
 .cajas-header h1 { margin: 0; font-size: 1.75rem; color: #333; }
 
 .apertura { display: flex; gap: 0.5rem; align-items: center; }
-.apertura input { padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 4px; width: 140px; }
 
 .cajas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
 
-.caja-card { background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.08); border-left: 5px solid #ddd; }
-.caja-card.abierta { border-left-color: #2ecc71; }
-.caja-card.cerrada { border-left-color: #e74c3c; }
+.caja-card { background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; text-align: center; }
+.caja-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
 
-.caja-title { font-weight: 700; margin-bottom: 0.5rem; }
-.caja-info { display: flex; flex-direction: column; gap: 0.25rem; color: #666; margin-bottom: 1rem; }
+.caja-title { font-weight: 700; margin: -1.5rem -1.5rem 0.75rem -1.5rem; color: #ffffff; background: #f59e0b; padding: 0.85rem 1.5rem; border-radius: 8px 8px 0 0; text-align: left; }
+.caja-info { display: flex; flex-direction: column; gap: 0.25rem; color: #666; margin-bottom: 1rem; align-items: center; background: #e0f2fe; border-radius: 10px; padding: 0.75rem 0.9rem; }
 
-.btn-primary { padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; }
-.btn-delete { padding: 0.5rem 1rem; background: #ff6b6b; color: white; border: none; border-radius: 4px; cursor: pointer; }
+.badge { padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+.badge.success { background: #d4edda; color: #155724; }
+.badge.warning { background: #fff3cd; color: #856404; }
+
+.caja-estado { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; }
+
+.btn-primary { padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 999px; font-weight: 600; cursor: pointer; }
+.btn-delete { padding: 0.6rem 1rem; background: #ff6b6b; color: white; border: none; border-radius: 999px; cursor: pointer; font-weight: 600; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; width: 75%; margin: 0 auto; min-height: 40px; line-height: 1; }
+.caja-card .btn-delete { width: 75%; display: block; margin: 0 auto; }
 
 .loading { text-align: center; padding: 2rem; color: #666; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+.modal-content { background: white; border-radius: 8px; max-width: 420px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e0e0e0; }
+.modal-header h2 { margin: 0; font-size: 1.2rem; }
+.btn-close { border: none; background: #f0f0f0; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 1.2rem; line-height: 1; }
+.caja-modal-body { padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.caja-modal-body label { font-weight: 600; color: #333; }
+.caja-modal-body input { padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; }
+.caja-modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; padding: 0 1.5rem 1.5rem; }
 
 @media (prefers-color-scheme: dark) {
   .cajas-header h1 { color: #e0e0e0; }
   .caja-card { background: #1e1e1e; }
+  .caja-title { background: #d97706; }
+  .caja-info { background: #0f172a; color: #e2e8f0; }
+  .modal-content { background: #1e1e1e; }
+  .modal-header { border-bottom-color: #2a2a2a; }
+  .modal-header h2 { color: #e0e0e0; }
+  .btn-close { background: #2a2a2a; color: #e0e0e0; }
+  .caja-modal-body label { color: #e0e0e0; }
+  .caja-modal-body input { background: #2a2a2a; border-color: #404040; color: #e0e0e0; }
 }

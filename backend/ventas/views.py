@@ -52,3 +52,10 @@ class VentaViewSet(viewsets.ModelViewSet):
             return Response(VentaSerializer(venta).data, status=status.HTTP_200_OK)
         except ValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=True, methods=['get'])
+    def boleta(self, request, pk=None):
+        venta = self.get_object()
+        # Generar si no existe
+        # Retornar PDF en response
+        pass    

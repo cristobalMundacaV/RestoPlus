@@ -3,7 +3,6 @@ from django.db import models
 class TipoInsumo(models.TextChoices):
     CRITICO = 'CRITICO', 'Crítico'
     GENERAL = 'GENERAL', 'General'
-    UNITARIO = 'UNITARIO', 'Unitario'
 
 class UnidadMedida(models.TextChoices):
     KILOGRAMOS = 'KG', 'Kilogramos'

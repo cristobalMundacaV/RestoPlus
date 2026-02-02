@@ -1,10 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import useAuthStore from '../store/authStore'
 import '../styles/layouts.css'
 
 export default function DashboardLayout({ children }) {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
+  const [collapsed, setCollapsed] = useState(true)
 
   const handleLogout = () => {
     logout()
@@ -16,9 +18,13 @@ export default function DashboardLayout({ children }) {
   return (
     <div className="layout-container">
       <nav className="navbar">
-        <div className="navbar-brand">RestoPlusV2</div>
+        <div className="navbar-brand">
+          <Link to="/dashboard" className="navbar-logo-link">
+            <img src="/img/Logo.PNG" alt="Foodies" className="navbar-logo" />
+          </Link>
+        </div>
         <div className="navbar-user">
-          <span>{user?.username || 'Usuario'}</span>
+          <span className="user-name">👤 {user?.username || 'Usuario'}</span>
           <button onClick={handleLogout} className="btn-logout">
             Salir
           </button>
@@ -26,19 +32,48 @@ export default function DashboardLayout({ children }) {
       </nav>
 
       <div className="layout-content">
-        <aside className="sidebar">
+        <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
           <nav className="sidebar-nav">
-            <Link to="/dashboard" className="nav-link">📊 Dashboard</Link>
-            <Link to="/pedidos" className="nav-link">📋 Pedidos</Link>
-            <Link to="/ventas" className="nav-link">💰 Ventas</Link>
-            <Link to="/mesas" className="nav-link">🪑 Mesas</Link>
-            <Link to="/productos" className="nav-link">🍽️ Productos</Link>
-            <Link to="/inventario" className="nav-link">📦 Inventario</Link>
-            <Link to="/cajas" className="nav-link">💳 Cajas</Link>
-            <Link to="/restaurantes" className="nav-link">🏪 Restaurantes</Link>
-            <Link to="/usuarios" className="nav-link">👤 Usuarios</Link>
-            <Link to="/reportes" className="nav-link">📊 Reportes</Link>
-            <Link to="/cocina" className="nav-link">👨‍🍳 Cocina</Link>
+            <Link to="/dashboard" className="nav-link">
+              <span className="nav-icon">📊</span>
+              <span className="nav-text">Dashboard</span>
+            </Link>
+            <Link to="/pedidos" className="nav-link">
+              <span className="nav-icon">📋</span>
+              <span className="nav-text">Pedidos</span>
+            </Link>
+            <Link to="/ventas" className="nav-link">
+              <span className="nav-icon">💰</span>
+              <span className="nav-text">Ventas</span>
+            </Link>
+            <Link to="/productos" className="nav-link">
+              <span className="nav-icon">🍽️</span>
+              <span className="nav-text">Productos</span>
+            </Link>
+            <Link to="/inventario" className="nav-link">
+              <span className="nav-icon">📦</span>
+              <span className="nav-text">Inventario</span>
+            </Link>
+            <Link to="/cajas" className="nav-link">
+              <span className="nav-icon">💳</span>
+              <span className="nav-text">Cajas</span>
+            </Link>
+            <Link to="/restaurantes" className="nav-link">
+              <span className="nav-icon">🏪</span>
+              <span className="nav-text">Restaurantes</span>
+            </Link>
+            <Link to="/usuarios" className="nav-link">
+              <span className="nav-icon">👤</span>
+              <span className="nav-text">Usuarios</span>
+            </Link>
+            <Link to="/reportes" className="nav-link">
+              <span className="nav-icon">📊</span>
+              <span className="nav-text">Reportes</span>
+            </Link>
+            <Link to="/cocina" className="nav-link">
+              <span className="nav-icon">👨‍🍳</span>
+              <span className="nav-text">Cocina</span>
+            </Link>
           </nav>
         </aside>
 

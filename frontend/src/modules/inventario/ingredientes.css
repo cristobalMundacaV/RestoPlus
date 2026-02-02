@@ -1,0 +1,353 @@
+.ingredientes-crud {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.crud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 15px;
+}
+
+.crud-header h1 {
+  margin: 0;
+  color: #333;
+  font-size: 28px;
+}
+
+.filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  align-items: center;
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+}
+
+.filter-checkbox input {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+/* Tabla de ingredientes */
+.ingredientes-table {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.ingredientes-table .tabla-header {
+  display: flex !important;
+  padding: 8px !important;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+  color: #495057;
+  font-size: 12px;
+  align-items: center;
+  line-height: 1.2;
+  flex-wrap: nowrap;
+  gap: 0 !important;
+}
+
+.ingredientes-table .tabla-header span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 4px;
+  min-width: 0;
+  flex-shrink: 1;
+  text-align: center;
+}
+
+.ingredientes-table .tabla-header .col-nombre { flex: 1; min-width: 0; }
+.ingredientes-table .tabla-header .col-stock { flex: 1; min-width: 0; }
+.ingredientes-table .tabla-header .col-minimo { flex: 1; min-width: 0; }
+.ingredientes-table .tabla-header .col-unidad { flex: 1; min-width: 0; }
+.ingredientes-table .tabla-header .col-critico { flex: 1; min-width: 0; }
+.ingredientes-table .tabla-header .col-acciones { flex: 1; min-width: 0; }
+
+.ingredientes-table .tabla-row {
+  display: flex !important;
+  padding: 8px !important;
+  align-items: center;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 13px;
+  flex-wrap: nowrap;
+  gap: 0 !important;
+}
+
+.ingredientes-table .tabla-row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 4px;
+  min-width: 0;
+  flex-shrink: 1;
+  text-align: center;
+}
+
+.ingredientes-table .tabla-row .col-nombre { flex: 1; min-width: 0; }
+.ingredientes-table .tabla-row .col-stock { flex: 1; min-width: 0; }
+.ingredientes-table .tabla-row .col-minimo { flex: 1; min-width: 0; }
+.ingredientes-table .tabla-row .col-unidad { flex: 1; min-width: 0; }
+.ingredientes-table .tabla-row .col-critico { flex: 1; min-width: 0; }
+.ingredientes-table .tabla-row .col-acciones { flex: 1; min-width: 0; }
+
+.tabla-row:hover {
+  background-color: #f8f9fa;
+}
+
+.tabla-row.critico {
+  background-color: #fff3cd;
+}
+
+.tabla-row.bajo-stock {
+  background-color: #f8d7da;
+}
+
+.tabla-row-expanded {
+  padding: 0 15px 15px 15px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.ajustar-stock-form {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  padding: 15px;
+  background-color: white;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.ajustar-stock-form label {
+  font-weight: 500;
+  margin: 0;
+}
+
+.ajustar-stock-form input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  flex: 1;
+  min-width: 100px;
+}
+
+.col-nombre { text-align: left; }
+.col-stock { text-align: center; }
+.col-minimo { text-align: center; }
+.col-unidad { text-align: center; }
+.col-critico { text-align: center; }
+.col-acciones { text-align: center; }
+
+.tabla-empty {
+  padding: 40px;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+}
+
+.loading {
+  padding: 40px;
+  text-align: center;
+  color: #666;
+  font-size: 16px;
+}
+
+/* Botones */
+.btn-primary, .btn-secondary, .btn-edit, .btn-stock, .btn-delete {
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.btn-primary:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  padding: 10px 20px;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #5a6268;
+}
+
+.btn-secondary:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-edit, .btn-stock, .btn-delete {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-edit {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.btn-edit:hover {
+  background-color: #138496;
+}
+
+.btn-stock {
+  background-color: #ffc107;
+  color: white;
+}
+
+.btn-stock:hover {
+  background-color: #e0a800;
+}
+
+.btn-delete {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-delete:hover {
+  background-color: #c82333;
+}
+
+/* Mensajes */
+.message {
+  position: fixed;
+  top: 88px;
+  right: 24px;
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  animation: slideIn 0.3s ease, fadeOut 0.6s ease 4.4s forwards;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  z-index: 999;
+  min-width: 280px;
+  max-width: 420px;
+}
+
+.message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.message.warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+.message button {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .tabla-header,
+  .tabla-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .crud-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .btn-edit, .btn-stock, .btn-delete {
+    margin: 5px 2px;
+  }
+}

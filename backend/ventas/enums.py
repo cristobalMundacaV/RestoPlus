@@ -6,3 +6,8 @@ class MetodoPago(models.TextChoices):
     TARJETA_DEBITO = 'TARJETA_DEBITO', 'Tarjeta de Débito'
     TRANSFERENCIA = 'TRANSFERENCIA', 'Transferencia Bancaria'
     MIXTOS = 'MIXTOS', 'Pagos Mixtos'
+
+class EstadoBoleta(models.TextChoices):
+    EMITIDA = 'EMITIDA', 'Emitida'
+    ANULADA = 'ANULADA', 'Anulada'
+    PENDIENTE = 'PENDIENTE', 'Pendiente'
