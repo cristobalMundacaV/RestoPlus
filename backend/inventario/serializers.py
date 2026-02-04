@@ -14,10 +14,28 @@ class IngredienteSerializer(serializers.ModelSerializer):
 class RecetaSerializer(serializers.ModelSerializer):
     producto_nombre = serializers.CharField(source='producto.nombre', read_only=True) 
     ingrediente_nombre = serializers.CharField(source='ingrediente.nombre', read_only=True)
+    ingrediente_unidad = serializers.CharField(source='ingrediente.unidad_medida', read_only=True)
     class Meta:
         model = Receta
-        fields = ['id', 'producto', 'producto_nombre', 'ingrediente', 'ingrediente_nombre', 'cantidad', 'creado', 'modificado']
-        read_only_fields = ['id', 'creado', 'modificado', 'producto_nombre', 'ingrediente_nombre']
+        fields = [
+            'id',
+            'producto',
+            'producto_nombre',
+            'ingrediente',
+            'ingrediente_nombre',
+            'ingrediente_unidad',
+            'cantidad',
+            'creado',
+            'modificado',
+        ]
+        read_only_fields = [
+            'id',
+            'creado',
+            'modificado',
+            'producto_nombre',
+            'ingrediente_nombre',
+            'ingrediente_unidad',
+        ]
 
 class MovimientoInventarioSerializer(serializers.ModelSerializer):
     ingrediente_nombre =serializers.CharField(source='ingrediente.nombre', read_only=True)

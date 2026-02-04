@@ -11,13 +11,12 @@
 .bi-sections-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: 1.5rem;
+  gap: 2rem;
   align-items: start;
 }
 
 .bi-section { 
   margin-bottom: 0;
-  height: 100%;
 }
 
 .bi-card {
@@ -27,7 +26,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   border-top: 3px solid #667eea;
   transition: box-shadow 0.2s;
-  height: 100%;
+  height: auto;
 }
 
 .bi-card:hover {

@@ -78,6 +78,76 @@
   font-size: 0.95rem;
 }
 
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+  background: #ffffff;
+  color: #1f2a37;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  z-index: 9999;
+  animation: toast-in 180ms ease-out;
+}
+
+.toast-success {
+  border-left: 6px solid #10b981;
+}
+
+.toast-error {
+  border-left: 6px solid #ef4444;
+}
+
+.toast-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #10b981;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.toast-error .toast-icon {
+  background: #ef4444;
+}
+
+.toast-message {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.toast-close {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.toast-close:hover {
+  color: #0f172a;
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
 .card-value {
   font-size: 2rem;
   font-weight: 700;
@@ -270,6 +340,17 @@
 .mesa-modal-body {
   padding: 1.25rem;
   color: #555;
+
+.mesa-confirm-list {
+  margin: 1rem 0 0;
+  padding-left: 1.2rem;
+  color: #1f2a37;
+  font-weight: 600;
+}
+
+.mesa-confirm-list li {
+  margin-bottom: 0.35rem;
+}
   text-align: center;
 }
 

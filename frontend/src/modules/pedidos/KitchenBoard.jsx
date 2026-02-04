@@ -26,15 +26,19 @@ export default function KitchenBoard() {
     try {
       const res = await pedidosAPI.list({ estado: 'EN_PREPARACION' })
       const data = res.data.results || res.data
-      setPedidos(data)
-
       const detallesMap = {}
       await Promise.all(
         data.map(async (pedido) => {
           const detRes = await detallesAPI.list({ pedido: pedido.id })
-          detallesMap[pedido.id] = detRes.data.results || detRes.data
+          const raw = detRes.data.results || detRes.data
+          const filtrados = raw.filter((item) =>
+            ['COMIDA', 'CONGELADOS'].includes(item.categoria_producto)
+          )
+          detallesMap[pedido.id] = filtrados
         })
       )
+      const pedidosConItems = data.filter((pedido) => (detallesMap[pedido.id] || []).length > 0)
+      setPedidos(pedidosConItems)
       setDetalles(detallesMap)
     } catch (error) {
       console.error('Error cargando pedidos cocina:', error)
@@ -49,6 +53,16 @@ export default function KitchenBoard() {
       cargarPedidos()
     } catch (error) {
       alert('No se pudo marcar como servido')
+    }
+  }
+
+  const actualizarEstimado = async (pedidoId, minutos) => {
+    const value = Math.max(0, Number(minutos) || 0)
+    try {
+      await pedidosAPI.update(pedidoId, { tiempo_estimado_minutos: value })
+      cargarPedidos()
+    } catch (error) {
+      alert('No se pudo actualizar el tiempo estimado')
     }
   }
 
@@ -70,7 +84,24 @@ export default function KitchenBoard() {
             <div className="kitchen-info">
               <span>Mesa: {pedido.mesa_numero || 'Mostrador'}</span>
               <span>Estado: {estadoLabel[pedido.estado] || pedido.estado}</span>
-              <span>Hora: {new Date(pedido.fecha_pedido).toLocaleTimeString('es-CL')}</span>
+              <span>Ingreso: {new Date(pedido.fecha_pedido).toLocaleTimeString('es-CL')}</span>
+              <span>
+                Inicio prep: {pedido.fecha_preparacion ? new Date(pedido.fecha_preparacion).toLocaleTimeString('es-CL') : '—'}
+              </span>
+              <span>
+                Completado: {pedido.fecha_servido ? new Date(pedido.fecha_servido).toLocaleTimeString('es-CL') : '—'}
+              </span>
+            </div>
+
+            <div className="kitchen-estimate">
+              <label htmlFor={`estimado-${pedido.id}`}>Tiempo estimado (min)</label>
+              <input
+                id={`estimado-${pedido.id}`}
+                type="number"
+                min="0"
+                defaultValue={pedido.tiempo_estimado_minutos || ''}
+                onBlur={(e) => actualizarEstimado(pedido.id, e.target.value)}
+              />
             </div>
 
             <div className="kitchen-items">

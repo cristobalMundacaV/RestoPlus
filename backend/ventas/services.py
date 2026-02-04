@@ -12,15 +12,18 @@ from .models import Venta
 
 @transaction.atomic
 def crear_venta(pedido, caja, usuario, metodo_pago):
-
-        if pedido.estado != 'CERRADO':
-            raise ValidationError("El pedido debe estar cerrado para realizar la venta.")
-        
         if hasattr(pedido, 'venta'):
             raise ValidationError("El pedido ya tiene una venta asociada.")
+
+        if pedido.estado == 'CANCELADO':
+            raise ValidationError("No se puede vender un pedido cancelado.")
         
         if not caja.abierta:
             raise ValidationError("La caja debe estar abierta para registrar una venta.")
+
+        if pedido.estado != 'CERRADO':
+            pedido.estado = 'CERRADO'
+            pedido.save(update_fields=['estado'])
 
         monto_total = sum(detalle.subtotal() for detalle in pedido.detalles.all())
 
@@ -69,7 +72,7 @@ def crear_venta(pedido, caja, usuario, metodo_pago):
                 MovimientoInventario.objects.create(
                     ingrediente=ingrediente,
                     cantidad=cantidad,
-                    tipo_movimiento=TipoMovimientoInventario.SALIDA,
+                    tipo_movimiento=TipoMovimientoInventario.EGRESO,
                     motivo=f'Venta Pedido {pedido.id}',
                     venta=venta
                 )
@@ -109,7 +112,7 @@ def anular_venta(venta, usuario_anulacion):
                 MovimientoInventario.objects.create(
                     ingrediente=ingrediente,
                     cantidad=cantidad,
-                    tipo_movimiento=TipoMovimientoInventario.ENTRADA,
+                    tipo_movimiento=TipoMovimientoInventario.INGRESO,
                     motivo=f'Anulación de venta Pedido {venta.pedido.id}',
                     venta=venta
                 )

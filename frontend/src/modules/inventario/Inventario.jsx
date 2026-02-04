@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import IngredientesCRUD from './IngredientesCRUD'
+import MovimientosInventario from './MovimientosInventario'
 import './inventario.css'
 
 export default function Inventario() {
@@ -23,6 +24,7 @@ export default function Inventario() {
       </div>
 
       {tab === 'ingredientes' && <IngredientesCRUD />}
+      {tab === 'movimientos' && <MovimientosInventario />}
     </div>
   )
 }

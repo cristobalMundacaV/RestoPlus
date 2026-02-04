@@ -14,20 +14,31 @@ def ventas_por_dia(fecha):
     ).aggregate(total=Sum('monto_total'))
 
 def ventas_por_rango(fecha_inicio, fecha_fin):
-    return Venta.objects.filter(
-        fecha_venta__date__range=(fecha_inicio, fecha_fin),
-        anulada=False
-    ).aggregate(total=Sum('monto_total'))
+    return list(
+        Venta.objects.filter(
+            fecha_venta__date__range=(fecha_inicio, fecha_fin),
+            anulada=False
+        ).annotate(
+            fecha=TruncDate('fecha_venta')
+        ).values('fecha').annotate(
+            total=Sum('monto_total'),
+            cantidad=Count('id')
+        ).order_by('fecha')
+    )
 
 def productos_mas_vendidos(top=10):
-    return DetallePedido.objects.values(
+    return DetallePedido.objects.filter(
+        pedido__venta__anulada=False
+    ).values(
         'producto__nombre'
     ).annotate(
         total_vendido=Sum('cantidad')
     ).order_by('-total_vendido')[:top]
 
 def productos_menos_vendidos(top=10):
-    return DetallePedido.objects.values(
+    return DetallePedido.objects.filter(
+        pedido__venta__anulada=False
+    ).values(
         'producto__nombre'
     ).annotate(
         total_vendido=Sum('cantidad')

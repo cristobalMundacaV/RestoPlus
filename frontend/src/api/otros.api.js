@@ -15,6 +15,9 @@ export const inventarioAPI = {
   
   // Recetas
   recetas: (params) => api.get('/inventario/recetas/', { params }),
+  crearReceta: (data) => api.post('/inventario/recetas/', data),
+  actualizarReceta: (id, data) => api.patch(`/inventario/recetas/${id}/`, data),
+  eliminarReceta: (id) => api.delete(`/inventario/recetas/${id}/`),
 }
 
 export const mesasAPI = {

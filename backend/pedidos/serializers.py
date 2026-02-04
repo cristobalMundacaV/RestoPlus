@@ -6,17 +6,51 @@ class PedidoSerializer(serializers.ModelSerializer):
     camarero_nombre = serializers.CharField(source='camarero.username', read_only=True)
     class Meta:
         model = Pedido
-        fields = ['id', 'mesa', 'mesa_numero', 'camarero', 'camarero_nombre', 'estado', 'fecha_pedido','creado','modificado']
-        read_only_fields = ['id', 'fecha_pedido','creado','modificado','mesa_numero','camarero_nombre']
+        fields = [
+            'id',
+            'mesa',
+            'mesa_numero',
+            'camarero',
+            'camarero_nombre',
+            'estado',
+            'fecha_pedido',
+            'fecha_preparacion',
+            'fecha_servido',
+            'tiempo_estimado_minutos',
+            'creado',
+            'modificado',
+        ]
+        read_only_fields = [
+            'id',
+            'fecha_pedido',
+            'fecha_preparacion',
+            'fecha_servido',
+            'creado',
+            'modificado',
+            'mesa_numero',
+            'camarero_nombre',
+        ]
 
 class DetallePedidoSerializer(serializers.ModelSerializer):
     nombre_producto = serializers.CharField(source='producto.nombre', read_only=True)
+    categoria_producto = serializers.CharField(source='producto.categoria.nombre', read_only=True)
     subtotal = serializers.SerializerMethodField()
 
     class Meta:
         model = DetallePedido
-        fields = ['id', 'pedido', 'producto', 'cantidad', 'precio_unitario', 'subtotal','creado','modificado','nombre_producto']
-        read_only_fields = ['id','subtotal','creado','modificado','nombre_producto']
+        fields = [
+            'id',
+            'pedido',
+            'producto',
+            'cantidad',
+            'precio_unitario',
+            'subtotal',
+            'creado',
+            'modificado',
+            'nombre_producto',
+            'categoria_producto',
+        ]
+        read_only_fields = ['id', 'subtotal', 'creado', 'modificado', 'nombre_producto', 'categoria_producto']
 
     def get_subtotal(self, obj):
         return obj.cantidad * obj.precio_unitario

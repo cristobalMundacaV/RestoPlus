@@ -71,7 +71,7 @@
 .producto-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 0.75rem;
 }
 
@@ -162,7 +162,8 @@
 }
 
 .btn-edit,
-.btn-delete {
+.btn-delete,
+.btn-toggle {
   flex: 1;
   padding: 0.6rem 1.4rem;
   border: none;
@@ -188,6 +189,24 @@
 
 .btn-delete:hover {
   background: #ff5252;
+}
+
+.btn-toggle-off {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-toggle-off:hover {
+  background: #dc2626;
+}
+
+.btn-toggle-on {
+  background: #16a34a;
+  color: white;
+}
+
+.btn-toggle-on:hover {
+  background: #15803d;
 }
 
 .btn-primary {

@@ -67,6 +67,51 @@
   border-top: 1px solid #eee; 
 }
 
+.inventario-movimientos-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.movimientos-search {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  min-width: 260px;
+}
+
+.movimientos-tabla .movimientos-header,
+.movimientos-tabla .movimientos-row {
+  grid-template-columns: 1.3fr 1.2fr 0.8fr 0.7fr 1.5fr;
+}
+
+.mov-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-neutral {
+  background: #e2e8f0;
+  color: #334155;
+}
+
 .tabla-row.critico { 
   background: #fff3cd; 
 }
@@ -89,5 +134,10 @@
   }
   .tabla-row { 
     border-top-color: #333; 
+  }
+  .movimientos-search {
+    background: #1e1e1e;
+    border-color: #333;
+    color: #e2e8f0;
   }
 }

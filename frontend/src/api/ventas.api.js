@@ -11,6 +11,7 @@ export const pedidosAPI = {
   create: (data) => api.post('/pedidos/pedidos/', data),
   get: (id) => api.get(`/pedidos/pedidos/${id}/`),
   update: (id, data) => api.patch(`/pedidos/pedidos/${id}/`, data),
+  remove: (id) => api.delete(`/pedidos/pedidos/${id}/`),
   cancelar: (id) => api.post(`/pedidos/pedidos/${id}/cancelar/`),
   cambiarEstado: (id, estado) => api.post(`/pedidos/pedidos/${id}/cambiar_estado/`, { estado }),
 }

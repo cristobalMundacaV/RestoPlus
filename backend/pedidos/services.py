@@ -59,6 +59,27 @@ class PedidoService:
         return pedido
     
     @staticmethod
+    @transaction.atomic
+    def preparar_pedido_con_deduccion(pedido):
+        """
+        Deduce ingredientes cuando el pedido pasa a EN_PREPARACION
+        """
+        from pedidos.models import EstadoPedido
+
+        if pedido.estado != EstadoPedido.ABIERTO:
+            raise ValidationError("El pedido debe estar en estado ABIERTO.")
+
+        # Validar stock antes de deducir
+        for detalle in pedido.detalles.select_related('producto').all():
+            PedidoService._validar_stock_producto(detalle.producto, detalle.cantidad)
+
+        # Deducir stock por cada detalle
+        for detalle in pedido.detalles.select_related('producto').all():
+            PedidoService._deducir_ingredientes_producto(detalle.producto, detalle.cantidad, pedido)
+
+        return pedido
+
+    @staticmethod
     def _validar_stock_producto(producto, cantidad):
         """
         Valida que haya stock suficiente de todos los ingredientes
@@ -137,13 +158,14 @@ class PedidoService:
         if pedido.estado == EstadoPedido.CERRADO:
             raise ValidationError("No se puede cancelar un pedido cerrado")
         
-        # Revertir stock de cada detalle
-        for detalle in pedido.detalles.select_related('producto').all():
-            PedidoService._revertir_ingredientes_producto(
-                detalle.producto,
-                detalle.cantidad,
-                pedido
-            )
+        # Revertir stock solo si fue descontado
+        if pedido.estado in [EstadoPedido.EN_PREPARACION, EstadoPedido.SERVIDO]:
+            for detalle in pedido.detalles.select_related('producto').all():
+                PedidoService._revertir_ingredientes_producto(
+                    detalle.producto,
+                    detalle.cantidad,
+                    pedido
+                )
         
         # Cambiar estado
         pedido.estado = EstadoPedido.CANCELADO

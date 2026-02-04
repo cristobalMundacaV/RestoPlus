@@ -6,3 +6,4 @@ class CategoriaProducto(models.TextChoices):
     BEBIDA_ALCOLICA = 'BEBIDA_ALCOLICA', 'Bebida Alcohólica'
     INGREDIENTE = 'INGREDIENTE', 'Ingrediente'
     INSUMO = 'INSUMO', 'Insumo'
+    CONGELADOS = 'CONGELADOS', 'Congelados'

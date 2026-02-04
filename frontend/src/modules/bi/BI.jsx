@@ -110,12 +110,19 @@ export default function BI() {
         <div className="bi-card">
           <div className="bi-card-title">Ventas últimos 7 días</div>
           <div className="bi-card-content">
-            {ventasRango.map((v, idx) => (
-              <div key={idx} className="bi-row">
-                <span>{v.fecha || '—'}</span>
-                <span>{formatMoney(v.total || 0)}</span>
+            {ventasRango.length === 0 ? (
+              <div className="bi-row">
+                <span>Sin datos</span>
+                <span>—</span>
               </div>
-            ))}
+            ) : (
+              ventasRango.map((v, idx) => (
+                <div key={idx} className="bi-row">
+                  <span>{v.fecha ? formatDate(v.fecha) : '—'}</span>
+                  <span>{formatMoney(v.total || 0)}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -145,12 +152,19 @@ export default function BI() {
         <div className="bi-card">
           <div className="bi-card-title">Productos más vendidos</div>
           <div className="bi-card-content">
-            {masVendidos.map((p, idx) => (
-              <div key={idx} className="bi-row">
-                <span>{p.producto || p.nombre || 'Producto'}</span>
-                <span>{p.total || p.cantidad || 0}</span>
+            {masVendidos.length === 0 ? (
+              <div className="bi-row">
+                <span>Sin datos</span>
+                <span>—</span>
               </div>
-            ))}
+            ) : (
+              masVendidos.map((p, idx) => (
+                <div key={idx} className="bi-row">
+                  <span>{p.producto__nombre || p.producto || p.nombre || 'Producto'}</span>
+                  <span>{p.total_vendido || p.total || p.cantidad || 0}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -159,12 +173,19 @@ export default function BI() {
         <div className="bi-card">
           <div className="bi-card-title">Productos menos vendidos</div>
           <div className="bi-card-content">
-            {menosVendidos.map((p, idx) => (
-              <div key={idx} className="bi-row">
-                <span>{p.producto || p.nombre || 'Producto'}</span>
-                <span>{p.total || p.cantidad || 0}</span>
+            {menosVendidos.length === 0 ? (
+              <div className="bi-row">
+                <span>Sin datos</span>
+                <span>—</span>
               </div>
-            ))}
+            ) : (
+              menosVendidos.map((p, idx) => (
+                <div key={idx} className="bi-row">
+                  <span>{p.producto__nombre || p.producto || p.nombre || 'Producto'}</span>
+                  <span>{p.total_vendido || p.total || p.cantidad || 0}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>

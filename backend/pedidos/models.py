@@ -28,6 +28,9 @@ class Pedido(ModeloBase):
         default=EstadoPedido.ABIERTO
     )
     fecha_pedido = models.DateTimeField(auto_now_add=True)
+    fecha_preparacion = models.DateTimeField(null=True, blank=True)
+    fecha_servido = models.DateTimeField(null=True, blank=True)
+    tiempo_estimado_minutos = models.PositiveIntegerField(null=True, blank=True)
     def __str__(self):
         mesa = self.mesa.numero if self.mesa else "Mostrador"
         return f"Pedido {self.id} - Mesa {mesa} - {self.estado}"

@@ -21,13 +21,15 @@ const estadoLabel = {
   EN_LIMPIEZA: 'En limpieza',
 }
 
-const salasDefault = ['Terraza delantera', 'Terraza trasera', 'Sala 1', 'Sala 2', 'Principal']
+const salasDefault = ['Terraza delantera', 'Terraza trasera', 'Sala 1', 'Sala 2']
 
 const getSalaOptions = (salas) => {
-  const names = salas.map((sala) => sala.nombre)
+  const names = salas.filter((sala) => sala.nombre !== 'Principal').map((sala) => sala.nombre)
   const merged = [...salasDefault, ...names]
   return Array.from(new Set(merged))
 }
+
+const normalizarSala = (nombre) => String(nombre || '').trim().toLowerCase()
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -49,8 +51,14 @@ export default function Dashboard() {
   const [pedidosPorMesa, setPedidosPorMesa] = useState({})
   const [metodoPago, setMetodoPago] = useState('EFECTIVO')
   const [accionesCantidad, setAccionesCantidad] = useState({})
+  const [toast, setToast] = useState(null)
+  const [confirmAgregarOpen, setConfirmAgregarOpen] = useState(false)
+  const [confirmAgregarItems, setConfirmAgregarItems] = useState([])
+  const [confirmAgregarMesa, setConfirmAgregarMesa] = useState(null)
+  const [confirmCobroOpen, setConfirmCobroOpen] = useState(false)
+  const [cobrandoMesa, setCobrandoMesa] = useState(false)
 
-  const getMesaKey = (mesa) => `${mesa.sala_nombre || salaSeleccionada || 'Principal'}-${mesa.numero}`
+  const getMesaKey = (mesa) => `${mesa.sala_nombre || salaSeleccionada || 'Sin sala'}-${mesa.numero}`
 
   useEffect(() => {
     const raw = localStorage.getItem('itemsPorMesa')
@@ -76,7 +84,17 @@ export default function Dashboard() {
       try {
         const parsed = JSON.parse(raw)
         if (parsed && typeof parsed === 'object') {
-          setPedidosPorMesa(parsed)
+          const normalized = Object.entries(parsed).reduce((acc, [key, value]) => {
+            if (Array.isArray(value)) {
+              acc[key] = value
+            } else if (typeof value === 'number') {
+              acc[key] = [value]
+            } else {
+              acc[key] = []
+            }
+            return acc
+          }, {})
+          setPedidosPorMesa(normalized)
         }
       } catch (error) {
         console.error('Error leyendo pedidosPorMesa:', error)
@@ -87,6 +105,138 @@ export default function Dashboard() {
   useEffect(() => {
     localStorage.setItem('pedidosPorMesa', JSON.stringify(pedidosPorMesa))
   }, [pedidosPorMesa])
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type })
+    window.setTimeout(() => {
+      setToast((current) => (current?.message === message ? null : current))
+    }, 2400)
+  }
+
+  const abrirConfirmacionAgregar = () => {
+    if (!panelMesa) {
+      return
+    }
+    const mesaKey = getMesaKey(panelMesa)
+    const draftItems = itemsPorMesa[mesaKey] || []
+    if (!draftItems.length) {
+      showToast('Agrega productos antes de registrar el pedido.', 'error')
+      return
+    }
+
+    const agrupados = new Map()
+    draftItems.forEach((item) => {
+      const current = agrupados.get(item.id)
+      if (current) {
+        agrupados.set(item.id, {
+          ...current,
+          cantidad: current.cantidad + item.cantidad,
+        })
+      } else {
+        agrupados.set(item.id, { ...item })
+      }
+    })
+
+    setConfirmAgregarItems(Array.from(agrupados.values()))
+    setConfirmAgregarMesa(panelMesa)
+    setConfirmAgregarOpen(true)
+  }
+
+  const abrirConfirmacionCobro = () => {
+    if (!panelMesa) {
+      return
+    }
+    const mesaKey = getMesaKey(panelMesa)
+    const pedidoIds = pedidosPorMesa[mesaKey] || []
+    if (!pedidoIds.length) {
+      showToast('No hay pedido asociado a esta mesa.', 'error')
+      return
+    }
+    setConfirmCobroOpen(true)
+  }
+
+  const imprimirComprobante = ({ cajaId, mesaNumero, fecha, items, total, metodo }) => {
+    const logoUrl = `${window.location.origin}/img/Logo.PNG`
+    const fechaTexto = new Date(fecha).toLocaleString('es-CL')
+    const rowsHtml = items
+      .map((item) => {
+        const subtotal =
+          typeof item.subtotal === 'number' ? item.subtotal : item.cantidad * item.precio
+        return `
+          <tr>
+            <td>${item.nombre}</td>
+            <td style="text-align:center;">${item.cantidad}</td>
+            <td style="text-align:right;">${formatMoney(subtotal)}</td>
+          </tr>
+        `
+      })
+      .join('')
+
+    const html = `
+      <html>
+        <head>
+          <title>Comprobante de venta</title>
+          <style>
+            @page { size: 80mm auto; margin: 0; }
+            * { box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 8px; color: #000; display: flex; justify-content: center; }
+            .ticket { width: 80mm; margin: 0 auto; }
+            .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 6px; }
+            .logo { height: 36px; display: block; margin: 0 auto 4px; }
+            .title { font-size: 14px; font-weight: 700; }
+            .meta { font-size: 11px; line-height: 1.4; margin-top: 6px; }
+            .meta div { display: flex; justify-content: space-between; }
+            table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 11px; }
+            th, td { padding: 4px 0; border-bottom: 1px dotted #000; }
+            th { text-align: left; font-weight: 700; }
+            .total { margin-top: 6px; display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; }
+            .footer { margin-top: 8px; font-size: 10px; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <div class="ticket">
+            <div class="header">
+              <img class="logo" src="${logoUrl}" alt="Foodies" />
+              <div class="title">Foodies</div>
+              <div>Comprobante de venta</div>
+            </div>
+            <div class="meta">
+              <div><span>Caja</span><span>#${cajaId}</span></div>
+              <div><span>Fecha</span><span>${fechaTexto}</span></div>
+              <div><span>Mesa</span><span>${mesaNumero}</span></div>
+              <div><span>Pago</span><span>${metodo}</span></div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th style="text-align:center;">Cant</th>
+                  <th style="text-align:right;">Subt</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+            <div class="total"><span>Total</span><span>${formatMoney(total)}</span></div>
+            <div class="footer">Gracias por su visita</div>
+          </div>
+          <script>
+            window.onload = () => {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `
+
+    const win = window.open('', '_blank', 'width=800,height=900')
+    if (win) {
+      win.document.open()
+      win.document.write(html)
+      win.document.close()
+    }
+  }
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -127,9 +277,10 @@ export default function Dashboard() {
     try {
       const res = await mesasAPI.salas()
       const data = res.data.results || res.data
-      setSalas(data)
-      if (!salaSeleccionada) {
-        const first = data.length ? data[0].nombre : getSalaOptions(data)[0]
+      const filtradas = data.filter((sala) => sala.nombre !== 'Principal')
+      setSalas(filtradas)
+      if (!salaSeleccionada || salaSeleccionada === 'Principal') {
+        const first = filtradas.length ? filtradas[0].nombre : getSalaOptions(filtradas)[0]
         setSalaSeleccionada(first)
       }
     } catch (error) {
@@ -184,24 +335,26 @@ export default function Dashboard() {
     return null
   }
 
-  const cargarPedidoActivoMesa = async (mesa) => {
+  const cargarPedidosActivosMesa = async (mesa) => {
     if (!mesa || String(mesa.id).startsWith('mock-')) {
-      return { pedidoId: null, items: [] }
+      return { pedidoIds: [], items: [] }
     }
 
     try {
       const pedidosRes = await pedidosAPI.list({ mesa: mesa.id })
       const pedidosData = pedidosRes.data.results || pedidosRes.data
-      const pedidoActivo =
-        pedidosData.find((pedido) => !['CERRADO', 'CANCELADO'].includes(pedido.estado)) ||
-        pedidosData[0]
+      const pedidosActivos = pedidosData.filter(
+        (pedido) => !['CERRADO', 'CANCELADO'].includes(pedido.estado)
+      )
 
-      if (!pedidoActivo) {
-        return { pedidoId: null, items: [] }
+      if (!pedidosActivos.length) {
+        return { pedidoIds: [], items: [] }
       }
 
-      const detallesRes = await detallesAPI.list({ pedido: pedidoActivo.id })
-      const detallesData = detallesRes.data.results || detallesRes.data
+      const detallesRes = await Promise.all(
+        pedidosActivos.map((pedido) => detallesAPI.list({ pedido: pedido.id }))
+      )
+      const detallesData = detallesRes.flatMap((res) => res.data.results || res.data)
       const items = detallesData.map((detalle) => {
         const precio = Number(detalle.precio_unitario || 0)
         const subtotal =
@@ -219,10 +372,10 @@ export default function Dashboard() {
         }
       })
 
-      return { pedidoId: pedidoActivo.id, items }
+      return { pedidoIds: pedidosActivos.map((pedido) => pedido.id), items }
     } catch (error) {
-      console.error('Error cargando pedido de la mesa:', error)
-      return { pedidoId: null, items: [] }
+      console.error('Error cargando pedidos de la mesa:', error)
+      return { pedidoIds: [], items: [] }
     }
   }
 
@@ -238,14 +391,12 @@ export default function Dashboard() {
 
     const mesaKey = getMesaKey(mesa)
     const draftItems = itemsPorMesa[mesaKey] || []
-    const { pedidoId, items } = await cargarPedidoActivoMesa(mesa)
+    const { pedidoIds, items } = await cargarPedidosActivosMesa(mesa)
 
-    if (pedidoId) {
-      setPedidosPorMesa((prev) => ({
-        ...prev,
-        [mesaKey]: pedidoId,
-      }))
-    }
+    setPedidosPorMesa((prev) => ({
+      ...prev,
+      [mesaKey]: pedidoIds,
+    }))
 
     setItemsMesa([...items, ...draftItems])
   }
@@ -253,13 +404,14 @@ export default function Dashboard() {
   const agregarProducto = () => {
     let producto = productoSeleccionado
     if (!producto) {
-      const match = productos.find(
-        (item) => item.nombre?.toLowerCase() === busquedaProducto.trim().toLowerCase()
-      )
-      if (match) {
-        producto = match
-      } else if (productosFiltrados.length > 0) {
-        producto = productosFiltrados[0]
+      const normalized = busquedaProducto.trim().toLowerCase()
+      if (normalized) {
+        const match = productos.find(
+          (item) => item.nombre?.toLowerCase() === normalized
+        )
+        if (match) {
+          producto = match
+        }
       }
     }
 
@@ -268,6 +420,47 @@ export default function Dashboard() {
     }
 
     const precio = Number(producto.precio || 0)
+    const draftExistente = itemsMesa.find(
+      (item) => item.id === producto.id && item.origen === 'draft'
+    )
+
+    if (draftExistente) {
+      const nuevaCantidad = draftExistente.cantidad + cantidad
+      setItemsMesa((prev) =>
+        prev.map((item) =>
+          item.tempId === draftExistente.tempId
+            ? { ...item, cantidad: nuevaCantidad, subtotal: nuevaCantidad * item.precio }
+            : item
+        )
+      )
+
+      if (panelMesa) {
+        const mesaKey = getMesaKey(panelMesa)
+        setItemsPorMesa((prevMap) => {
+          const drafts = prevMap[mesaKey] || []
+          const updated = drafts.map((draft) =>
+            draft.tempId === draftExistente.tempId
+              ? {
+                  ...draft,
+                  cantidad: nuevaCantidad,
+                  subtotal: nuevaCantidad * draft.precio,
+                }
+              : draft
+          )
+          return {
+            ...prevMap,
+            [mesaKey]: updated,
+          }
+        })
+      }
+
+      setProductoSeleccionado(null)
+      setBusquedaProducto('')
+      setMostrarSugerencias(false)
+      setCantidad(1)
+      return
+    }
+
     const nuevoItem = {
       tempId: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       id: producto.id,
@@ -296,30 +489,36 @@ export default function Dashboard() {
       return
     }
     if (String(panelMesa.id).startsWith('mock-')) {
-      alert('No se puede registrar pedido en mesas de prueba.')
+      showToast('No se puede registrar pedido en mesas de prueba.', 'error')
       return
     }
     const mesaKey = getMesaKey(panelMesa)
     const draftItems = itemsPorMesa[mesaKey] || []
     if (!draftItems.length) {
-      alert('Agrega productos antes de registrar el pedido.')
+      showToast('Agrega productos antes de registrar el pedido.', 'error')
       return
     }
 
     try {
-      let pedidoId = pedidosPorMesa[mesaKey]
+      const resPedido = await pedidosAPI.create({ mesa: panelMesa.id })
+      const pedidoId = resPedido.data.id
+      await pedidosAPI.cambiarEstado(pedidoId, 'EN_PREPARACION')
 
-      if (!pedidoId) {
-        const resPedido = await pedidosAPI.create({ mesa: panelMesa.id })
-        pedidoId = resPedido.data.id
-        setPedidosPorMesa((prev) => ({
-          ...prev,
-          [mesaKey]: pedidoId,
-        }))
-      }
+      const draftsMap = new Map()
+      draftItems.forEach((item) => {
+        const current = draftsMap.get(item.id)
+        if (current) {
+          draftsMap.set(item.id, {
+            ...current,
+            cantidad: current.cantidad + item.cantidad,
+          })
+        } else {
+          draftsMap.set(item.id, { ...item })
+        }
+      })
 
       await Promise.all(
-        draftItems.map((item) =>
+        Array.from(draftsMap.values()).map((item) =>
           detallesAPI.create({
             pedido: pedidoId,
             producto: item.id,
@@ -334,12 +533,17 @@ export default function Dashboard() {
         [mesaKey]: [],
       }))
 
-      const { items } = await cargarPedidoActivoMesa(panelMesa)
+      const { pedidoIds, items } = await cargarPedidosActivosMesa(panelMesa)
+      setPedidosPorMesa((prev) => ({
+        ...prev,
+        [mesaKey]: pedidoIds,
+      }))
       setItemsMesa(items)
-      alert('Productos agregados al pedido.')
+      showToast('Productos agregados al pedido.', 'success')
+      setConfirmAgregarOpen(false)
     } catch (error) {
       console.error('Error registrando pedido:', error)
-      alert('Error al agregar productos al pedido')
+      showToast('Error al agregar productos al pedido', 'error')
     }
   }
 
@@ -379,7 +583,7 @@ export default function Dashboard() {
         )
       } catch (error) {
         console.error('Error aumentando cantidad:', error)
-        alert('No se pudo aumentar la cantidad')
+        showToast('No se pudo aumentar la cantidad', 'error')
       }
       return
     }
@@ -422,7 +626,7 @@ export default function Dashboard() {
         setItemsMesa((prev) => prev.filter((_, i) => i !== index))
       } catch (error) {
         console.error('Error eliminando producto:', error)
-        alert('No se pudo eliminar el producto')
+        showToast('No se pudo eliminar el producto', 'error')
       }
       return
     }
@@ -439,40 +643,110 @@ export default function Dashboard() {
     })
   }
 
-  const cobrarMesa = async () => {
+  const cobrarMesa = async (imprimir = false) => {
+    if (cobrandoMesa) {
+      return
+    }
     if (!panelMesa) {
       return
     }
     if (String(panelMesa.id).startsWith('mock-')) {
-      alert('No se puede cobrar una mesa de prueba.')
+      showToast('No se puede cobrar una mesa de prueba.', 'error')
       return
     }
 
     const mesaKey = getMesaKey(panelMesa)
-    const pedidoId = pedidosPorMesa[mesaKey]
-    if (!pedidoId) {
-      alert('No hay pedido asociado a esta mesa.')
+    const pedidoIds = pedidosPorMesa[mesaKey] || []
+    if (!pedidoIds.length) {
+      showToast('No hay pedido asociado a esta mesa.', 'error')
       return
     }
 
     try {
+      setCobrandoMesa(true)
+      const itemsParaBoleta = itemsMesa.map((item) => ({
+        nombre: item.nombre,
+        cantidad: item.cantidad,
+        precio: item.precio,
+        subtotal: typeof item.subtotal === 'number' ? item.subtotal : item.cantidad * item.precio,
+      }))
+      const totalParaBoleta = itemsParaBoleta.reduce((acc, item) => acc + item.subtotal, 0)
       const cajasRes = await cajasAPI.list()
       const cajasData = cajasRes.data.results || cajasRes.data
       const cajaAbierta = cajasData.find((caja) => caja.abierta)
       if (!cajaAbierta) {
-        alert('No hay caja abierta.')
+        showToast('No hay caja abierta.', 'error')
         return
       }
 
-      await pedidosAPI.cambiarEstado(pedidoId, 'CERRADO')
+      if (metodoPago === 'MIXTOS') {
+        await Promise.all(
+          pedidoIds.map((pedidoId) =>
+            ventasAPI.create({
+              pedido: pedidoId,
+              caja: cajaAbierta.id,
+              metodo_pago: metodoPago,
+            })
+          )
+        )
+      } else {
+        const [pedidoPrincipal, ...otrosPedidos] = pedidoIds
+        if (otrosPedidos.length) {
+          const detallesPrincipalRes = await detallesAPI.list({ pedido: pedidoPrincipal })
+          const detallesPrincipal = detallesPrincipalRes.data.results || detallesPrincipalRes.data
+          const detallesMap = new Map()
+          detallesPrincipal.forEach((detalle) => {
+            detallesMap.set(detalle.producto, {
+              id: detalle.id,
+              cantidad: detalle.cantidad,
+              precio: Number(detalle.precio_unitario || 0),
+            })
+          })
 
-      await ventasAPI.create({
-        pedido: pedidoId,
-        caja: cajaAbierta.id,
-        metodo_pago: metodoPago,
-      })
+          for (const pedidoId of otrosPedidos) {
+            const detallesRes = await detallesAPI.list({ pedido: pedidoId })
+            const detalles = detallesRes.data.results || detallesRes.data
+            for (const detalle of detalles) {
+              const existente = detallesMap.get(detalle.producto)
+              if (existente) {
+                const nuevaCantidad = existente.cantidad + detalle.cantidad
+                await detallesAPI.update(existente.id, { cantidad: nuevaCantidad })
+                detallesMap.set(detalle.producto, {
+                  ...existente,
+                  cantidad: nuevaCantidad,
+                })
+              } else {
+                const creado = await detallesAPI.create({
+                  pedido: pedidoPrincipal,
+                  producto: detalle.producto,
+                  cantidad: detalle.cantidad,
+                  precio_unitario: detalle.precio_unitario,
+                })
+                detallesMap.set(detalle.producto, {
+                  id: creado.data.id,
+                  cantidad: detalle.cantidad,
+                  precio: Number(detalle.precio_unitario || 0),
+                })
+              }
+            }
+          }
+
+          await Promise.all(otrosPedidos.map((pedidoId) => pedidosAPI.remove(pedidoId)))
+        }
+
+        await ventasAPI.create({
+          pedido: pedidoPrincipal,
+          caja: cajaAbierta.id,
+          metodo_pago: metodoPago,
+        })
+      }
 
       await mesasAPI.cambiarEstado(panelMesa.id, { estado: 'DISPONIBLE' })
+        setMesas((prev) =>
+          prev.map((mesa) =>
+            mesa.id === panelMesa.id ? { ...mesa, estado: 'DISPONIBLE' } : mesa
+          )
+        )
 
       setItemsMesa([])
       setItemsPorMesa((prev) => {
@@ -486,11 +760,28 @@ export default function Dashboard() {
         return next
       })
       setPanelMesa(null)
-      alert('Mesa cobrada correctamente.')
+      showToast('Mesa cobrada correctamente.', 'success')
+      setConfirmCobroOpen(false)
+      if (imprimir) {
+        imprimirComprobante({
+          cajaId: cajaAbierta.id,
+          mesaNumero: panelMesa.numero,
+          fecha: new Date(),
+          items: itemsParaBoleta,
+          total: totalParaBoleta,
+          metodo: metodoPago,
+        })
+      }
     } catch (error) {
       console.error('Error cobrando mesa:', error)
-      const mensaje = error?.response?.data?.error || 'Error al cobrar la mesa'
-      alert(mensaje)
+      const mensaje =
+        error?.response?.data?.error ||
+        error?.response?.data?.detail ||
+        error?.message ||
+        'Error al cobrar la mesa'
+      showToast(mensaje, 'error')
+    } finally {
+      setCobrandoMesa(false)
     }
   }
 
@@ -505,7 +796,7 @@ export default function Dashboard() {
   }, 0)
 
   const completarMesasPorSala = (lista) => {
-    const sala = salaSeleccionada || 'Principal'
+    const sala = salaSeleccionada || 'Sin sala'
     const tope = sala === 'Sala 1' || sala === 'Sala 2' ? 12 : 24
 
     const existentes = new Set(lista.map((mesa) => Number(mesa.numero)))
@@ -532,6 +823,15 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
+      {toast && (
+        <div className={`toast toast-${toast.type}`} role="status" aria-live="polite">
+          <span className="toast-icon">{toast.type === 'error' ? '✕' : '✓'}</span>
+          <span className="toast-message">{toast.message}</span>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Cerrar">
+            ×
+          </button>
+        </div>
+      )}
       <div className="dashboard-header">
         <div className="header-left">
           <h1>Panel de Control</h1>
@@ -571,7 +871,11 @@ export default function Dashboard() {
           {/* Mesas Grid */}
           <div className="mesas-grid">
             {completarMesasPorSala(
-              mesas.filter((mesa) => !salaSeleccionada || mesa.sala_nombre === salaSeleccionada)
+              mesas.filter(
+                (mesa) =>
+                  !salaSeleccionada ||
+                  normalizarSala(mesa.sala_nombre) === normalizarSala(salaSeleccionada)
+              )
             ).map((mesa) => (
                 <div
                   key={mesa.id}
@@ -789,13 +1093,103 @@ export default function Dashboard() {
                 </select>
               </div>
               <div className="mesa-panel-actions">
-                <button className="mesa-panel-submit" onClick={registrarPedidoMesa}>
+                <button className="mesa-panel-submit" onClick={abrirConfirmacionAgregar}>
                   Agregar productos
                 </button>
-                <button className="mesa-panel-charge" onClick={cobrarMesa}>
+                <button className="mesa-panel-charge" onClick={abrirConfirmacionCobro}>
                   Cobrar mesa
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmAgregarOpen && confirmAgregarMesa && (
+        <div className="mesa-modal-overlay" onClick={() => setConfirmAgregarOpen(false)}>
+          <div className="mesa-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="mesa-modal-header">
+              <h3>Confirmar productos</h3>
+              <button
+                className="mesa-modal-close"
+                onClick={() => setConfirmAgregarOpen(false)}
+                aria-label="Cerrar"
+              >
+                ×
+              </button>
+            </div>
+            <div className="mesa-modal-body">
+              <p>
+                Estás a punto de agregar estos productos a la mesa{' '}
+                <strong>{confirmAgregarMesa.numero}</strong>
+              </p>
+              <ul className="mesa-confirm-list">
+                {confirmAgregarItems.map((item) => (
+                  <li key={`confirm-${item.id}`}>
+                    {item.nombre} x{item.cantidad}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="mesa-modal-actions">
+              <button
+                className="modal-btn modal-btn-secondary"
+                onClick={() => setConfirmAgregarOpen(false)}
+              >
+                Volver
+              </button>
+              <button className="modal-btn modal-btn-primary" onClick={registrarPedidoMesa}>
+                Agregar productos
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmCobroOpen && panelMesa && (
+        <div className="mesa-modal-overlay" onClick={() => setConfirmCobroOpen(false)}>
+          <div className="mesa-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="mesa-modal-header">
+              <h3>Imprimir comprobante</h3>
+              <button
+                className="mesa-modal-close"
+                onClick={() => setConfirmCobroOpen(false)}
+                aria-label="Cerrar"
+              >
+                ×
+              </button>
+            </div>
+            <div className="mesa-modal-body">
+              <p>
+                ¿Deseas imprimir el comprobante de venta de la mesa{' '}
+                <strong>{panelMesa.numero}</strong>?
+              </p>
+            </div>
+            <div className="mesa-modal-actions">
+              <button
+                className="modal-btn modal-btn-secondary"
+                onClick={() => setConfirmCobroOpen(false)}
+              >
+                Volver
+              </button>
+              <button
+                className="modal-btn modal-btn-secondary"
+                onClick={() => {
+                  setConfirmCobroOpen(false)
+                  cobrarMesa(false)
+                }}
+              >
+                No imprimir
+              </button>
+              <button
+                className="modal-btn modal-btn-primary"
+                onClick={() => {
+                  setConfirmCobroOpen(false)
+                  cobrarMesa(true)
+                }}
+              >
+                Imprimir
+              </button>
             </div>
           </div>
         </div>

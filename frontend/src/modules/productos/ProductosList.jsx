@@ -17,6 +17,7 @@ export default function ProductosList() {
     { value: 'BEBIDA_ALCOLICA', label: 'Bebida Alcohólica' },
     { value: 'INGREDIENTE', label: 'Ingrediente' },
     { value: 'INSUMO', label: 'Insumo' },
+    { value: 'CONGELADOS', label: 'Congelados' },
   ]
   const [filters, setFilters] = useState({
     search: '',
@@ -24,6 +25,16 @@ export default function ProductosList() {
     disponible: '',
     activo: '',
   })
+
+  const dedupeCategorias = (data) => {
+    const map = new Map()
+    data.forEach((cat) => {
+      if (!map.has(cat.nombre)) {
+        map.set(cat.nombre, cat)
+      }
+    })
+    return Array.from(map.values())
+  }
 
   useEffect(() => {
     cargarDatos()
@@ -41,7 +52,7 @@ export default function ProductosList() {
       ])
       setProductos(prodRes.data.results || prodRes.data)
       const categoriasData = catRes.data.results || catRes.data
-      setCategorias(categoriasData)
+      setCategorias(dedupeCategorias(categoriasData))
 
       if (!seedingCategorias) {
         const existentes = new Set(categoriasData.map((cat) => cat.nombre))
@@ -58,7 +69,7 @@ export default function ProductosList() {
             )
           )
           const recarga = await categoriasAPI.list({ activo: true })
-          setCategorias(recarga.data.results || recarga.data)
+          setCategorias(dedupeCategorias(recarga.data.results || recarga.data))
           setSeedingCategorias(false)
         }
       }
@@ -99,6 +110,19 @@ export default function ProductosList() {
       cargarDatos()
     } catch (error) {
       alert('Error al marcar favorito')
+    }
+  }
+
+  const handleToggleActivo = async (producto) => {
+    try {
+      if (producto.activo) {
+        await productosAPI.desactivar(producto.id)
+      } else {
+        await productosAPI.activar(producto.id)
+      }
+      cargarDatos()
+    } catch (error) {
+      alert('Error al cambiar estado del producto')
     }
   }
 
@@ -185,6 +209,12 @@ export default function ProductosList() {
             <div className="producto-actions">
               <button onClick={() => handleEdit(producto)} className="btn-edit">
                 Editar
+              </button>
+              <button
+                onClick={() => handleToggleActivo(producto)}
+                className={`btn-toggle ${producto.activo ? 'btn-toggle-off' : 'btn-toggle-on'}`}
+              >
+                {producto.activo ? 'Desactivar' : 'Activar'}
               </button>
             </div>
           </div>
